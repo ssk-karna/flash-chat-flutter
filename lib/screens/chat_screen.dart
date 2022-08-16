@@ -71,17 +71,20 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),);
                   }
                     final messages = snapshot.data!.docs;
-                  List<Text> messageWidgets = [];
+                  List<MessageBubble> messageBubbles = [];
                   for(var message in messages){
                     final messageText = message.get('text');
                     final messageSender = message.get('sender');
 
-                    final messageWidget = Text('$messageText from $messageSender');
+                    final messageBubble = MessageBubble(text: messageText, sender: messageSender);
 
-                    messageWidgets.add(messageWidget);
+                    messageBubbles.add(messageBubble);
                   }
-                  return Column(
-                    children: messageWidgets,
+                  return Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0,vertical: 20.0),
+                      children: messageBubbles,
+                    ),
                   );
                 }),
             Container(
@@ -118,3 +121,42 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+
+
+class MessageBubble extends StatelessWidget {
+
+  MessageBubble({required this.text,required this.sender});
+
+  late final String text;
+  late final String sender;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Text(sender, style:TextStyle(
+            fontSize: 12.0,
+          color: Colors.black54),
+          ),
+          Material(
+            elevation: 5.0,
+            borderRadius: BorderRadius.circular(30.0),
+            color: Colors.lightBlueAccent,
+           child: Padding(
+             padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 20),
+             child: Text('$text from $sender',
+             style: TextStyle(
+               fontSize: 15.0,
+               color: Colors.white,
+             ),),
+           ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
