@@ -21,17 +21,24 @@ class _ChatScreenState extends State<ChatScreen> {
     getCurrentUser();
   }
 
-  void getCurrentUser(){
+  void getCurrentUser() {
     try {
       final user = _auth.currentUser;
       if (user != null) {
         loggedInUser = user;
       }
     }
-    catch(e){
+    catch (e) {
       print(e);
     }
+  }
 
+  void messageStream() async {
+    await for (var snapshot in _fireStore.collection('messages').snapshots()) {
+      for (var message in snapshot.docs) {
+        print(message.data);
+      }
+    }
   }
 
   @override
@@ -55,6 +62,28 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            StreamBuilder<QuerySnapshot>(
+                stream: _fireStore.collection('messages').snapshots(),
+                builder: (context, snapshot) {
+                  if(!snapshot.hasData){
+                    return Center(child: CircularProgressIndicator(
+                      backgroundColor: Colors.lightBlueAccent,
+                    ),);
+                  }
+                    final messages = snapshot.data!.docs;
+                  List<Text> messageWidgets = [];
+                  for(var message in messages){
+                    final messageText = message.get('text');
+                    final messageSender = message.get('sender');
+
+                    final messageWidget = Text('$messageText from $messageSender');
+
+                    messageWidgets.add(messageWidget);
+                  }
+                  return Column(
+                    children: messageWidgets,
+                  );
+                }),
             Container(
               decoration: messageContainerDecoration,
               child: Row(
